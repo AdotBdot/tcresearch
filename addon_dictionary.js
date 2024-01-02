@@ -37,4 +37,15 @@ var addon_dictionary = {
      		"stupidity": ["entropy", "mind"]
     		}
   	}
+,
+"gtnh": {
+	"name": "Gregtech: New Horizons",
+	"aspects": ["equality", "insanity", "beginning", "star"],
+	"combinations": {
+		"equality": ["mind", "order"],
+      		"insanity": ["mind", "taint"],
+        	"beginning": ["void", "motion"],
+      		"star": ["light", "beginning"]
+    		}
+  	}
 };
