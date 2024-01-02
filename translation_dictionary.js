@@ -52,14 +52,14 @@ var translate = {
 	"mechanism": "machina",
 	"trap": "vinculum",
 	"exchange": "permutatio",
-	"wrath": "ira",
+	"wrath": "ira",//Forbidden Magic
 	"nether": "infernus",
 	"gluttony": "gula",
 	"envy": "invidia",
 	"sloth": "desidia",
 	"pride": "superbia",
 	"lust": "luxuria",
-	"time": "tempus",
+	"time": "tempus",//Magic Bees
 	"electricity": "electrum",//Gregtech
 	"magnetism": "magneto",
 	"cheatiness": "nebrisum",
