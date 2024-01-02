@@ -60,9 +60,10 @@ var translate = {
 	"pride": "superbia",
 	"lust": "luxuria",
 	"time": "tempus",
-	"electricity": "electrum",
+	"electricity": "electrum",//Gregtech
 	"magnetism": "magneto",
 	"cheatiness": "nebrisum",
 	"radioactivity": "radio",
-	"stupidity": "stronito"
+	"stupidity": "stronito",
+	"apocalypse": "terminus"//Avaritia
 };
