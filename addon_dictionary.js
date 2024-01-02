@@ -40,10 +40,11 @@ var addon_dictionary = {
 ,
 "gtnh": {
 	"name": "Gregtech: New Horizons",
-	"aspects": ["equality", "insanity", "beginning", "star"],
+	"aspects": ["equality", "insanity", "glory", "beginning", "star"],
 	"combinations": {
 		"equality": ["mind", "order"],
       		"insanity": ["mind", "taint"],
+		"glory": ["man", "travel"],
         	"beginning": ["void", "motion"],
       		"star": ["light", "beginning"]
     		}
