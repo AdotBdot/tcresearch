@@ -66,7 +66,7 @@ var translate = {
 	"radioactivity": "radio",
 	"stupidity": "stronito",
 	"apocalypse": "terminus"//Avaritia
-	"equality": "aequalitas",//Gergtech New Horizons
+	"equality": "aequalitas",//Gregtech New Horizons
 	"glory": "gloria",
 	"insanity": "vesania",
 	"beginning": "primordium",
