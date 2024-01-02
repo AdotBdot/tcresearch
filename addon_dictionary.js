@@ -1,4 +1,11 @@
 var addon_dictionary = {
+"av": {
+	"name": "Avaritia",
+	"aspects":["apocalypse"],
+	"combinations":{
+		"apocalypse": ["greed", "alien"]
+		} 
+	},
 "fm": {
 	"name": "Forbidden Magic",
 	"aspects":["wrath", "nether", "gluttony", "envy", "sloth", "pride", "lust"],
