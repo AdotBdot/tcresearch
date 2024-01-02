@@ -1,9 +1,9 @@
 var addon_dictionary = {
 "av": {
 	"name": "Avaritia",
-	"aspects":["apocalypse"],
+	"aspects":["terminus"],
 	"combinations":{
-		"apocalypse": ["greed", "alien"]
+		"terminus": ["greed", "alien"]
 		} 
 	},
 "fm": {
