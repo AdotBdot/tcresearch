@@ -36,9 +36,8 @@ var addon_dictionary = {
       		"radioactivity": ["light", "energy"],
      		"stupidity": ["entropy", "mind"]
     		}
-  	}
-,
-"gtnh": {
+  	},
+"nh": {
 	"name": "Gregtech: New Horizons",
 	"aspects": ["equality", "insanity", "glory", "beginning", "star"],
 	"combinations": {
