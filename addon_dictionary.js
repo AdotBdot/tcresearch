@@ -3,7 +3,7 @@ var addon_dictionary = {
 	"name": "Avaritia",
 	"aspects":["apocalypse"],
 	"combinations":{
-		"apocalypse": ["greed", "alien"]
+		"apocalypse": ["greed", "alienis"]
 		} 
 	},
 "fm": {
