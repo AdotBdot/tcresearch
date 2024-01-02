@@ -67,6 +67,7 @@ var translate = {
 	"stupidity": "stronito",
 	"apocalypse": "terminus"//Avaritia
 	"equality": "aequalitas",//Gergtech New Horizons
+	"glory": "gloria",
 	"insanity": "vesania",
 	"beginning": "primordium",
 	"star": "astrum"
