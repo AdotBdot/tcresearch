@@ -65,7 +65,7 @@ var translate = {
 	"cheatiness": "nebrisum",
 	"radioactivity": "radio",
 	"stupidity": "stronito",
-	"apocalypse": "terminus"//Avaritia
+	"apocalypse": "terminus",//Avaritia
 	"equality": "aequalitas",//Gregtech New Horizons
 	"glory": "gloria",
 	"insanity": "vesania",
