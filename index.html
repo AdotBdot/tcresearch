@@ -2,7 +2,7 @@
 <html>
 <head>
 	<meta charset="UTF-8">
-	<title>Thaumcraft 4.x-5.x Research Helper</title>
+	<title>Thaumcraft Research Helper</title>
 	<script type="text/javascript" src="buckets-minified.js"></script>
 	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
 	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
@@ -21,16 +21,16 @@
 	</style>
 </head>
 <body>
-	<h2>Thaumcraft 4.x-5.x Research Helper</h2>
-	<div id="combination_box"><div id="left"></div><span class="operator">+</span><div id="right"></div><span class="operator">=</span><div id="equals"></div></div>
+	<h2>Thaumcraft Research Helper</h2>
+	<div id="combination_box">
+		<div id="left"></div>
+		<span class="operator">+</span>
+		<div id="right"></div>
+		<span class="operator">=</span>
+		<div id="equals"></div>
+	</div>
 	<table>
-		<tr>
-			<td>Version:</td>
-			<td>
-				<select id="version">
-				</select>
-			</td>
-		</tr>
+		<tr><td>Version:</td><td><select id="version"></select></td></tr>
 		<tr><td>From:</td><td><input type=hidden id="fromSel"></input></td></tr>
 		<tr><td>To:</td><td><input type=hidden id="toSel"></input></td></tr>
 		<tr><td>Min. Steps:</td><td><input id="spinner" name="value" value="1" style="width:140px" /></td></tr>
