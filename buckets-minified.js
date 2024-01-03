@@ -1,5 +1,15 @@
-var buckets={defaultCompare:function(a,b){return a<b?-1:a===b?0:1},defaultEquals:function(a,b){return a===b},defaultToString:function(a){return null===a?"BUCKETS_NULL":buckets.isUndefined(a)?"BUCKETS_UNDEFINED":buckets.isString(a)?a:a.toString()},isFunction:function(a){return"function"===typeof a},isUndefined:function(a){return"undefined"===typeof a},isString:function(a){return"[object String]"===Object.prototype.toString.call(a)},reverseCompareFunction:function(a){return buckets.isFunction(a)?function(b,
-c){return-1*a(b,c)}:function(a,c){return a<c?1:a===c?0:-1}},compareToEquals:function(a){return function(b,c){return 0===a(b,c)}},arrays:{}};buckets.arrays.indexOf=function(a,b,c){c=c||buckets.defaultEquals;for(var d=a.length,e=0;e<d;e++)if(c(a[e],b))return e;return-1};buckets.arrays.lastIndexOf=function(a,b,c){c=c||buckets.defaultEquals;for(var d=a.length-1;0<=d;d--)if(c(a[d],b))return d;return-1};buckets.arrays.contains=function(a,b,c){return 0<=buckets.arrays.indexOf(a,b,c)};
+var buckets = {
+    defaultCompare:function(a,b){return a < b ? -1 : a === b ? 0 : 1},
+    defaultEquals:function(a,b){return a === b},
+    defaultToString:function(a){return null === a ? "BUCKETS_NULL" : buckets.isUndefined(a) ? "BUCKETS_UNDEFINED" : buckets.isString(a) ? a : a.toString()},
+    isFunction:function(a){return"function" === typeof a},
+    isUndefined:function(a){return"undefined" === typeof a},
+    isString:function(a){return"[object String]" === Object.prototype.toString.call(a)},
+    reverseCompareFunction:function(a){return buckets.isFunction(a) ? function(b,c){return -1 * a(b, c)}:function(a,c){return a < c ? 1 : a === c ? 0 : -1}},
+    compareToEquals:function(a){return function(b,c){return 0 === a(b, c)}},
+    arrays:{}
+};
+buckets.arrays.indexOf=function(a,b,c){c=c||buckets.defaultEquals;for(var d=a.length,e=0;e<d;e++)if(c(a[e],b))return e;return-1};buckets.arrays.lastIndexOf=function(a,b,c){c=c||buckets.defaultEquals;for(var d=a.length-1;0<=d;d--)if(c(a[d],b))return d;return-1};buckets.arrays.contains=function(a,b,c){return 0<=buckets.arrays.indexOf(a,b,c)};
 buckets.arrays.remove=function(a,b,c){b=buckets.arrays.indexOf(a,b,c);if(0>b)return!1;a.splice(b,1);return!0};buckets.arrays.frequency=function(a,b,c){c=c||buckets.defaultEquals;for(var d=a.length,e=0,f=0;f<d;f++)c(a[f],b)&&e++;return e};buckets.arrays.equals=function(a,b,c){c=c||buckets.defaultEquals;if(a.length!==b.length)return!1;for(var d=a.length,e=0;e<d;e++)if(!c(a[e],b[e]))return!1;return!0};buckets.arrays.copy=function(a){return a.concat()};
 buckets.arrays.swap=function(a,b,c){if(0>b||b>=a.length||0>c||c>=a.length)return!1;var d=a[b];a[b]=a[c];a[c]=d;return!0};buckets.arrays.forEach=function(a,b){for(var c=a.length,d=0;d<c&&!1!==b(a[d]);d++);};buckets.LinkedList=function(){this.lastNode=this.firstNode=null;this.nElements=0};
 buckets.LinkedList.prototype.add=function(a,b){buckets.isUndefined(b)&&(b=this.nElements);if(0>b||b>this.nElements||buckets.isUndefined(a))return!1;var c=this.createNode(a);if(0===this.nElements)this.lastNode=this.firstNode=c;else if(b===this.nElements)this.lastNode=this.lastNode.next=c;else if(0===b)c.next=this.firstNode,this.firstNode=c;else{var d=this.nodeAtIndex(b-1);c.next=d.next;d.next=c}this.nElements++;return!0};buckets.LinkedList.prototype.first=function(){if(null!==this.firstNode)return this.firstNode.element};
