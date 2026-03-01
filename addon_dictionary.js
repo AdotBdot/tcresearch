@@ -47,5 +47,27 @@ var addon_dictionary = {
 		"glory": ["man", "travel"],
       		"star": ["light", "beginning"]
     		}
-  	}
+  	},
+"iaf": {
+	"name": "Ice and Fire",
+	"aspects": ["mythological"],
+	"combinations": {
+		"mythological": ["beast", "magic"]
+	},
+},
+"ta": {
+	"name": "Thaumic Additions",
+	"aspects": ["wave", "sound", "destruction", "god", "dragon", "hell", "wind", "sight", "control"],
+	"combinations": {
+		"wave": ["motion", "water"],
+		"sound": ["wave", "air"],
+		"destruction": ["entropy", "tool"],
+		"god": ["man", "desire"],
+		"dragon": ["god", "life"],
+		"hell": ["fire", "undead"],
+		"wind": ["air", "flight"],
+		"sight": ["senses", "crystal"],
+		"control": ["mind", "machine"]
+	}
+}
 };
