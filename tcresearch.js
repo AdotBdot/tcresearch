@@ -303,6 +303,22 @@ $(function()
 	$(document).on( "click", "#avail_default .aspect, [id^='avail_addon_'] .aspect", function(){
 		toggle(this);
 		saveState();
+		
+		$.each(addon_aspect_map, function(addonKey, addonAspects) {
+			let allAspectsEnabled = true;
+			addonAspects.forEach(function(aspect) {
+				if ($('[data-aspect="' + aspect + '"]').hasClass('unavail')) {
+					allAspectsEnabled = false;
+				}
+			});
+			
+			const addonButton = $('#' + addonKey + '.addon-toggle');
+			if (allAspectsEnabled && addonAspects.length > 0) {
+				addonButton.addClass('active');
+			} else {
+				addonButton.removeClass('active');
+			}
+		});
 	});
 
 	const $combinationBox = $("#combination_box");
@@ -588,17 +604,6 @@ $(function()
 	function restoreState(savedAspects, savedAddons) {
 		if (!savedAspects) return;
 		
-		if (savedAddons && savedAddons.length > 0) {
-			$.each(addon_aspect_map, function(addonKey) {
-				const addonButton = $('#' + addonKey + '.addon-toggle');
-				if (savedAddons.includes(addonKey)) {
-					addonButton.addClass('active');
-				} else {
-					addonButton.removeClass('active');
-				}
-			});
-		}
-		
 		$('#avail_default .aspect, [id^="avail_addon_"] .aspect').each(function() {
 			const aspect = $(this).attr('data-aspect');
 			if (!savedAspects.includes(aspect)) {
@@ -607,6 +612,22 @@ $(function()
 			} else {
 				$(this).find("img").attr("src", function(i,orig){ return orig.replace(/mono/, "color"); });
 				$(this).removeClass("unavail");
+			}
+		});
+		
+		$.each(addon_aspect_map, function(addonKey, addonAspects) {
+			let allAspectsEnabled = true;
+			addonAspects.forEach(function(aspect) {
+				if ($('[data-aspect="' + aspect + '"]').hasClass('unavail')) {
+					allAspectsEnabled = false;
+				}
+			});
+			
+			const addonButton = $('#' + addonKey + '.addon-toggle');
+			if (allAspectsEnabled && addonAspects.length > 0) {
+				addonButton.addClass('active');
+			} else {
+				addonButton.removeClass('active');
 			}
 		});
 	}
