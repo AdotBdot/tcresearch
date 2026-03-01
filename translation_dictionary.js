@@ -52,6 +52,8 @@ var translate = {
 	"mechanism": "machina",
 	"trap": "vinculum",
 	"exchange": "permutatio",
+	"alchemy": "alkimia",
+	"alien": "alienis",
 	"wrath": "ira",//Forbidden Magic
 	"nether": "infernus",
 	"gluttony": "gula",
@@ -70,5 +72,15 @@ var translate = {
 	"glory": "gloria",
 	"insanity": "vesania",
 	"beginning": "primordium",
-	"star": "astrum"
+	"star": "astrum",
+	"mythological": "mythus",//Ice and Fire
+	"wave": "fluctus",//Thaumic Additions
+	"sound": "sonus",
+	"destruction": "exitium",
+	"god": "caeles",
+	"dragon": "draco",
+	"hell": "infernum",
+	"wind": "ventus",
+	"sight": "visum",
+	"control": "imperium"
 };
