@@ -1,15 +1,65 @@
 $(function()
 {
-	var latest_version = "6.1.BETA26";
+	// Theme toggle
+	function initTheme() {
+		const savedTheme = localStorage.getItem('theme') || 'light';
+		applyTheme(savedTheme);
+	}
+
+	function applyTheme(theme) {
+		if (theme === 'dark') {
+			document.body.classList.add('dark-mode');
+			$('#theme-icon').text('☀️');
+			localStorage.setItem('theme', 'dark');
+		} else {
+			document.body.classList.remove('dark-mode');
+			$('#theme-icon').text('🌙');
+			localStorage.setItem('theme', 'light');
+		}
+	}
+
+	$('#theme-toggle').click(function() {
+		const isDark = document.body.classList.contains('dark-mode');
+		applyTheme(isDark ? 'light' : 'dark');
+	});
+
+	const latest_version = "6.1.BETA26";
+	let version = latest_version;
+
+	// Preferences
+	function loadPreferences() {
+		const savedVersion = localStorage.getItem('selectedVersion');
+		const savedFromAspect = localStorage.getItem('fromAspect');
+		const savedToAspect = localStorage.getItem('toAspect');
+		const savedAddons = localStorage.getItem('selectedAddons');
+		const savedAspects = localStorage.getItem('selectedAspects');
+
+		if (savedVersion) version = savedVersion;
+		if (savedFromAspect) document.getElementById('fromSel').value = savedFromAspect;
+		if (savedToAspect) document.getElementById('toSel').value = savedToAspect;
+
+		return {
+			version: savedVersion,
+			fromAspect: savedFromAspect,
+			toAspect: savedToAspect,
+			addons: savedAddons ? JSON.parse(savedAddons) : [],
+			aspects: savedAspects ? JSON.parse(savedAspects) : []
+		};
+	}
+
+	initTheme();
+	const preferences = loadPreferences();
 	$.each(version_dictionary, function(key, version){
 		$("#version").append("<option value=" + key + ">" + key + "</option>");
 	});
-	var aspects = [];
-	var addon_aspects;
-	var combinations = {};
-	$("#version").val(latest_version);
-	var version=latest_version;
-	graph = {};
+	let aspects = [];
+	let addon_aspects;
+	let default_aspects = [];
+	let tier_aspects = [];
+	let combinations = {};
+	$("#version").val(preferences.version || latest_version);
+	version = preferences.version || latest_version;
+	let graph = {};
 
 	function connect(aspect1, aspect2)
 	{
@@ -38,8 +88,8 @@ $(function()
 		function search(queue, to, visited)
 		{
 			while (!queue.isEmpty()) {
-				var element = queue.dequeue();
-				var node = element.path.pop();
+				const element = queue.dequeue();
+				let node = element.path.pop();
 				if(!(node in visited) || visited[node].indexOf(element.path.length) < 0)
 				{
 					element.path.push(node);
@@ -47,7 +97,7 @@ $(function()
 						return element.path;
 
 					graph[node].forEach(function(entry) {
-						var newpath = element.path.slice();
+						const newpath = element.path.slice();
 						newpath.push(entry);
 						queue.enqueue({"path":newpath,"length":element.length+getWeight(entry)});
 					});
@@ -61,18 +111,18 @@ $(function()
 			return null;
 		}
 
-		var queue = new buckets.PriorityQueue(function(a,b) {return b.length-a.length;});
+		const queue = new buckets.PriorityQueue(function(a,b) {return b.length-a.length;});
 		queue.enqueue({"path":[from],"length":0});
-		visited = {};
+		let visited = {};
 		return search(queue, to, visited);
 	}
 
 	function push_addons(aspects, combinations)
 	{
 		addon_aspects = [];
-		addon_array = addon_dictionary;
+		const addon_array = addon_dictionary;
 		$.each(addon_dictionary, function(key, addon_info){
-			$("#addons").append('<input type="checkbox" class="addon_toggle" id="'+key+'" /> <label for="'+key+'">'+addon_info["name"]+'</label>');
+			$("#addons").append('<button type="button" class="addon-toggle" id="'+key+'">'+addon_info["name"]+'</button>');
 			$.each(addon_info["aspects"], function(number, aspect){
 				addon_aspects.push(aspect);
 			});
@@ -95,7 +145,7 @@ $(function()
 	function toggle_addons(aspect_list)
 	{
 		aspect_list.forEach(function(e){
-			var obj = $('#'+e);
+			const obj = $('[data-aspect="'+e+'"]');
 			obj.find("img").attr("src", function(i, orig){ return orig.replace(/color/, "mono"); });
 			obj.addClass("unavail");
 		});
@@ -103,7 +153,7 @@ $(function()
 
 	function option(value, text)
 	{
-		var option = document.createElement("option");
+		const option = document.createElement("option");
 		option.value = value;
 		option.textContent = text;
 		return option;
@@ -114,22 +164,24 @@ $(function()
 		return string.charAt(0).toUpperCase() + string.slice(1);
 	}
 
-	fromSel = document.getElementById("fromSel");
-	toSel = document.getElementById("toSel");
-	check = document.getElementById("available");
-	steps = $("#spinner").spinner({min: 1, max: 10});
+	const fromSel = document.getElementById("fromSel");
+	const toSel = document.getElementById("toSel");
+	const check = document.getElementById("available");
+	const steps = $("#spinner").spinner({min: 1, max: 10});
 	reset_aspects();
 
 	$("#find_connection").click(function(){
 		run();
 	});
 
-	$('#addons').on("change", ".addon_toggle", function() {
-		addon = $(this).attr("id");
-		if(this.checked)
+	$('#addons').on("click", ".addon-toggle", function() {
+		const addon = $(this).attr("id");
+		$(this).toggleClass("active");
+		
+		if($(this).hasClass("active"))
 		{
 			addon_dictionary[addon]["aspects"].forEach(function(e){
-				var obj = $('#'+e);
+				const obj = $('[data-aspect="'+e+'"]');
 				obj.find("img").attr("src", function(i,orig){ return orig.replace(/mono/, "color"); });
 				obj.removeClass("unavail");
 			});
@@ -137,153 +189,358 @@ $(function()
 		else
 		{
 			addon_dictionary[addon]["aspects"].forEach(function(e){
-				var obj = $('#'+e);
+				const obj = $('[data-aspect="'+e+'"]');
 				obj.find("img").attr("src", function(i,orig){ return orig.replace(/color/, "mono"); });
 				obj.addClass("unavail");
 			});
 		}
+		saveState();
 	});
 
 	$("#sel_all").click(function(){
-		$(".aspect").each(function(){
+		$("#avail_default .aspect, #avail_addon .aspect").each(function(){
 			$(this).find("img").attr("src", function(i,orig){ return orig.replace("mono", "color")});
 			$(this).removeClass("unavail");
 		});
-		$(".addon_toggle").prop('checked', true);
+		$(".addon-toggle").addClass('active');
+		saveState();
 	});
 
-	$("#desel_all").click(function(){
-		$(".aspect").each(function(){
+	$("#def_only").click(function(){
+		$(".addon-toggle").removeClass('active');
+		$("#avail_default .aspect").each(function(){
+			$(this).find("img").attr("src", function(i,orig){ return orig.replace("mono", "color")});
+			$(this).removeClass("unavail");
+		});
+		$("#avail_addon .aspect").each(function(){
 			$(this).find("img").attr("src", function(i,orig){ return orig.replace("color", "mono")});
 			$(this).addClass("unavail");
 		});
-		$(".addon_toggle").prop('checked', false);
+		saveState();
+	});
+
+	$("#desel_all").click(function(){
+		$("#avail_default .aspect, #avail_addon .aspect").each(function(){
+			$(this).find("img").attr("src", function(i,orig){ return orig.replace("color", "mono")});
+			$(this).addClass("unavail");
+		});
+		$(".addon-toggle").removeClass('active');
+		saveState();
 	});
 
 	$("#version").change(function(){
 		version = $("#version").val();
-		$(".result").dialog("close");
+		localStorage.setItem('selectedVersion', version);
+		$(".result").each(function() {
+			if($(this).hasClass('ui-dialog-content')) {
+				$(this).dialog("close");
+			}
+		});
 		reset_aspects();
+		$("#def_only").click();
 	});
 
-	$("#avail").on( "click", ".aspect", function(){
+	$(document).on( "click", "#avail_default .aspect, #avail_addon .aspect", function(){
 		toggle(this);
+		saveState();
 	});
 
-	$("body").on("mouseenter", ".aspectlist .aspect", function() {
-		var aspect = $(this).attr("id");
-		if(aspect != "fire" && aspect != "water" && aspect != "order" && aspect != "air" && aspect != "entropy" && aspect != "earth")
-		{
-			var combination = combinations[aspect];
-			$("#combination_box #left").html('<img src="aspects/color/' + translate[combination[0]] + '.png" /><div class="name">' + formatAspectName(translate[combination[0]]) + '</div><div class="desc">' + combination[0] + '</div>');
-			$("#combination_box #right").html('<img src="aspects/color/' + translate[combination[1]] + '.png" /><div class="name">' + formatAspectName(translate[combination[1]]) + '</div><div class="desc">' + combination[1] + '</div>');
-			$("#combination_box #equals").html('<img src="aspects/color/' + translate[aspect] + '.png" /><div class="name">' + formatAspectName(translate[aspect]) + '</div><div class="desc">' + aspect + '</div>');
-			$(this).mousemove(function(e) {
-				$("#combination_box").css({left:e.pageX+10, top:e.pageY-100}).show();
-			});
+	const $combinationBox = $("#combination_box");
+	
+	$(document).on("mouseover", "#avail_default .aspect, #avail_addon .aspect", function(e) {
+		const aspect = $(e.target).closest(".aspect").attr("data-aspect");
+		
+		if(!aspect || aspect === "fire" || aspect === "water" || aspect === "order" || aspect === "air" || aspect === "entropy" || aspect === "earth") {
+			$combinationBox.hide();
+			return;
 		}
-		else
-		{
-			$("#combination_box").hide();
+		
+		const combination = combinations[aspect];
+		if(!combination) {
+			$combinationBox.hide();
+			return;
 		}
-	});
-
-	$("body").on("mouseleave", ".aspectlist .aspect", function() {
-		$("#combination_box").hide();
-	});
-
-	$("#close_results").click(function(){
-		$(".result").dialog("close");
+		
+		$("#combination_box #left").html('<img src="aspects/color/' + translate[combination[0]] + '.png" /><div class="name">' + formatAspectName(translate[combination[0]]) + '</div><div class="desc">' + combination[0] + '</div>');
+		$("#combination_box #right").html('<img src="aspects/color/' + translate[combination[1]] + '.png" /><div class="name">' + formatAspectName(translate[combination[1]]) + '</div><div class="desc">' + combination[1] + '</div>');
+		$("#combination_box #equals").html('<img src="aspects/color/' + translate[aspect] + '.png" /><div class="name">' + formatAspectName(translate[aspect]) + '</div><div class="desc">' + aspect + '</div>');
+		const boxWidth = 400;
+		$combinationBox.css({left: e.pageX - (boxWidth/2), top: e.pageY - 130}).show();
 	});
 	
+	$(document).on("mouseout", "#avail_default .aspect, #avail_addon .aspect", function(e) {
+		$combinationBox.hide();
+	});
+
+	$(document).on("mouseover", ".aspect_result", function(e) {
+		const aspect = $(e.target).closest(".aspect_result").attr("data-aspect");
+		
+		if(!aspect) {
+			$combinationBox.hide();
+			return;
+		}
+		
+		const combination = combinations[aspect];
+		if(!combination) {
+			$combinationBox.hide();
+			return;
+		}
+		
+		$("#combination_box #left").html('<img src="aspects/color/' + translate[combination[0]] + '.png" /><div class="name">' + formatAspectName(translate[combination[0]]) + '</div><div class="desc">' + combination[0] + '</div>');
+		$("#combination_box #right").html('<img src="aspects/color/' + translate[combination[1]] + '.png" /><div class="name">' + formatAspectName(translate[combination[1]]) + '</div><div class="desc">' + combination[1] + '</div>');
+		$("#combination_box #equals").html('<img src="aspects/color/' + translate[aspect] + '.png" /><div class="name">' + formatAspectName(translate[aspect]) + '</div><div class="desc">' + aspect + '</div>');
+		const boxWidth = 400;
+		$combinationBox.css({left: e.pageX - (boxWidth/2), top: e.pageY - 130}).show();
+	});
+	
+	$(document).on("mouseout", ".aspect_result", function(e) {
+		$combinationBox.hide();
+	});
+
 	function reset_aspects()
 	{
 		aspects = $.extend([], version_dictionary[version]["base_aspects"]);
 		combinations = $.extend(true, {}, version_dictionary[version]["combinations"]);
-		$("#avail, #addons").empty();
-		$('#fromSel,#toSel').select2('destroy')
-		$(".addon_toggle").prop('checked', false);
+		$("#avail_default, #avail_addon, #addons").empty();
+		$(".addon-toggle").removeClass('active');
+		
 		tier_aspects = [];
 		$.each(combinations, function(aspect, value){tier_aspects.push(aspect);});
 		tier_aspects = tier_aspects.sort(aspectSort);
 		aspects = aspects.concat(tier_aspects);
+		
 		push_addons(aspects, combinations);
-		aspects.forEach(function(aspect) {$('#avail').append('<li class="aspect" id="'+aspect+'"><img src="aspects/color/' + translate[aspect] + '.png" /><div>' + formatAspectName(translate[aspect]) + '</div><div class="desc">' + aspect + '</div></li>');});
+		
+		default_aspects = [];
+		$.each(version_dictionary[version]["base_aspects"], function(i, asp){
+			default_aspects.push(asp);
+		});
+		$.each(tier_aspects, function(i, asp){
+			default_aspects.push(asp);
+		});
+		
+		default_aspects.forEach(function(aspect) {
+			$('#avail_default').append('<li class="aspect" data-aspect="'+aspect+'"><img src="aspects/color/' + translate[aspect] + '.png" /><div>' + formatAspectName(translate[aspect]) + '</div><div class="desc">' + aspect + '</div></li>');
+		});
+		
+		addon_aspects.forEach(function(aspect) {
+			$('#avail_addon').append('<li class="aspect" data-aspect="'+aspect+'"><img src="aspects/color/' + translate[aspect] + '.png" /><div>' + formatAspectName(translate[aspect]) + '</div><div class="desc">' + aspect + '</div></li>');
+		});
+		
 		toggle_addons(addon_aspects);
-		var ddData = [];
-		aspects.forEach(function(aspect) {
-			//I have to use the 'aspect' as 'text' because i need it in the matcher function to access the translated version of it.
-			ddData.push({text: aspect, id: aspect});
-		});
-		ddData.sort(ddDataSort);
-		function format(d)
-		{
-			var aspect = d.id;
-			return '<div class="aspect" id="'+aspect+'"><img style="margin: 4px 5px 0 0" src="aspects/color/' + translate[aspect] + '.png" /><div>' + formatAspectName(translate[aspect]) + '</div><div class="desc">' + aspect + '</div></div>'
-		}
-
-		$('#toSel,#fromSel').select2({
-			data: ddData,
-			formatResult: format,
-		    formatSelection: format,
-		    width: '200px',
-		    allowClear: false,
-		    sortResults: function(results, container, query) {
-    			return results.sort(function(a, b) {
-    				console.log(a,b)
-    				return translate[a.id].localeCompare(translate[b.id]);
-    			});
-        	},
-		    matcher: function(search,text) { return text.toUpperCase().indexOf(search.toUpperCase())>=0 || translate[text].toUpperCase().indexOf(search.toUpperCase())>=0 }
-		});
-		$('#toSel,#fromSel').select2("val", "air");
+		
+		$('#avail_default').closest('.aspects-group').find('.aspects-group-title').text('Default (' + default_aspects.length + ')');
+		$('#avail_addon').closest('.aspects-group').find('.aspects-group-title').text('Addons (' + addon_aspects.length + ')');
+		
 		graph={};
 		for(compound in combinations)
 		{
 			connect(compound, combinations[compound][0]);
 			connect(compound, combinations[compound][1]);
 		}
+		
+		if (preferences && preferences.addons && preferences.aspects) {
+			restoreState(preferences.addons, preferences.aspects);
+		}
 	}
 	function run()
 	{
-		var fromSel = $('#fromSel').select2("val");
-		var toSel = $('#toSel').select2("val");
-		var path = find(fromSel, toSel, steps.spinner("value"));
-		var id = fromSel + 'to' + toSel;
-		var title = formatAspectName(translate[fromSel])+' &rarr; '+formatAspectName(translate[toSel]);
-		var step_count=0;
-		var aspect_count={};
+		const fromSel = document.getElementById("fromSel").value;
+		const toSel = document.getElementById("toSel").value;
+		const path = find(fromSel, toSel, steps.spinner("value"));
+		const id = fromSel + 'to' + toSel;
+		const step_count = path.length - 2;
+		const title = formatAspectName(translate[fromSel])+' &rarr; '+formatAspectName(translate[toSel]) + ' (Total Steps: ' + step_count + ')';
+		const aspect_count={};
 		$.each(aspects, function(aspect, value){aspect_count[value]=0;});
 		$('#' + id).remove();
 		$("body").append('<ul id="'+id+'" class="aspectlist result" title="'+title+'"></ul>');
-		$('#' + id).dialog({autoOpen: false, modal: false, resizable: false, width: 200});
+		const dialogWidth = Math.round($(window).width() * 0.8);
+		$('#' + id).dialog({autoOpen: false, modal: false, resizable: false, width: dialogWidth});
 		$('#' + id).append("<div></div>");
-		var loop_count=0;
+		let loop_count=0;
 		path.forEach(function(e) {
 			loop_count++;
 			if(loop_count != 1 && loop_count != path.length)
 			{
 				aspect_count[e]++;
-				step_count++;
 			}
-			$('#'+id).append('<li class="aspect_result aspect" id="' + e + '"><img src="aspects/color/' + translate[e] + '.png" /><div>' + formatAspectName(translate[e]) + '</div><div class="desc">' + e + '</div></li><li>↓</li>');
+			$('#'+id).append('<li class="aspect_result aspect" data-aspect="' + e + '"><img src="aspects/color/' + translate[e] + '.png" /><div><div class="name">' + formatAspectName(translate[e]) + '</div><div class="desc">' + e + '</div></div></li>');
+			if(loop_count !== path.length) {
+				$('#'+id).append('<li style="padding: 0.5rem 0; font-size: 1.5rem; color: #667eea;">↓</li>');
+			}
 		});
-		$('#' + id).children().last().remove();
+		
 		$('#' + id).append('<li id="aspects_used">Aspects Used</li>');
-		var used = '<ul id="aspects_used_list">';
+		let used = '<ul id="aspects_used_list">';
 		$.each(aspect_count, function(aspect, value){
-			if(value > 0)
-				used = $(used).append('<li title="' + translate[aspect] + ': ' + value + '" style="background-image:url(\'aspects/color/' + translate[aspect] + '.png\')">' + value + '</li>');
+			if(value > 0) {
+				const aspectImg = 'aspects/color/' + translate[aspect] + '.png';
+				used += '<li title="' + translate[aspect] + ': ' + value + '" style="background-image:url(\'' + aspectImg + '\')">' + value + '</li>';
+			}
 		});
-		used = $(used).append("<div>Total Steps: "+ step_count+"</div>");
-		used = $(used).append('</ul>');
+		used += '</ul>';
 		$('#' + id).append(used);
 		$('#' + id).dialog("open");
 	}
 
+	// Aspect Selection Popup
+	function showAspectPicker(targetField) {
+		const modal = document.createElement('div');
+		modal.id = 'aspect-picker-modal';
+		modal.className = 'aspect-picker-modal';
+		
+		const backdrop = document.createElement('div');
+		backdrop.className = 'aspect-picker-backdrop';
+		backdrop.onclick = function() {
+			modal.remove();
+			backdrop.remove();
+		};
+		
+		const content = document.createElement('div');
+		content.className = 'aspect-picker-content';
+		
+		const header = document.createElement('h5');
+		header.textContent = 'Select an Aspect';
+		header.style.marginBottom = '1.5rem';
+		header.style.fontWeight = '600';
+		content.appendChild(header);
+		
+		// Search input
+		const searchInput = document.createElement('input');
+		searchInput.type = 'text';
+		searchInput.className = 'aspect-picker-search';
+		searchInput.placeholder = 'Search aspects...';
+		content.appendChild(searchInput);
+		
+		const grid = document.createElement('div');
+		grid.className = 'aspect-picker-grid';
+		grid.id = 'aspect-picker-grid';
+		
+		// Get available aspects
+		let availableAspects = [];
+		$('#avail_default .aspect, #avail_addon .aspect').each(function() {
+			if (!$(this).hasClass('unavail')) {
+				availableAspects.push($(this).attr('data-aspect'));
+			}
+		});
+		
+		// Create aspect buttons
+		function renderAspects(aspectsToRender) {
+			grid.innerHTML = '';
+			if (aspectsToRender.length === 0) {
+				const noResults = document.createElement('div');
+				noResults.style.gridColumn = '1 / -1';
+				noResults.style.textAlign = 'center';
+				noResults.style.padding = '2rem';
+				noResults.style.color = '#999';
+				noResults.textContent = 'No aspects found';
+				grid.appendChild(noResults);
+				return;
+			}
+			
+			aspectsToRender.forEach(function(aspect) {
+				const button = document.createElement('div');
+				button.className = 'aspect-picker-item';
+				button.innerHTML = '<img src="aspects/color/' + translate[aspect] + '.png" /><div class="name">' + formatAspectName(translate[aspect]) + '</div>';
+				button.onclick = function() {
+					document.getElementById(targetField).value = aspect;
+					updateAspectDisplay(targetField);
+					backdrop.click();
+				};
+				grid.appendChild(button);
+			});
+		}
+		
+		renderAspects(availableAspects);
+		
+		// Search functionality
+		searchInput.addEventListener('input', function() {
+			const query = this.value.toLowerCase();
+			const filtered = availableAspects.filter(function(aspect) {
+				return translate[aspect].toLowerCase().indexOf(query) >= 0 || aspect.toLowerCase().indexOf(query) >= 0;
+			});
+			renderAspects(filtered);
+		});
+		
+		content.appendChild(grid);
+		modal.appendChild(content);
+		document.body.appendChild(modal);
+		document.body.appendChild(backdrop);
+		backdrop.style.display = 'block';
+		searchInput.focus();
+	}
+
+	function updateAspectDisplay(fieldId) {
+		const value = document.getElementById(fieldId).value;
+		const displayId = fieldId + '_display';
+		const displayEl = document.getElementById(displayId);
+		
+		if (value) {
+			displayEl.innerHTML = '<img src="aspects/color/' + translate[value] + '.png" style="max-width: 32px; max-height: 32px; margin-right: 0.5rem;" /><span>' + formatAspectName(translate[value]) + '</span>';
+			displayEl.classList.remove('text-muted');
+			if (fieldId === 'fromSel') {
+				localStorage.setItem('fromAspect', value);
+			} else if (fieldId === 'toSel') {
+				localStorage.setItem('toAspect', value);
+			}
+		} else {
+			displayEl.textContent = 'Select an aspect...';
+			displayEl.classList.add('text-muted');
+		}
+	}
+
+	function saveState() {
+		const selectedAddons = [];
+		const selectedAspects = [];
+		
+		$('.addon-toggle.active').each(function() {
+			selectedAddons.push($(this).attr('id'));
+		});
+		
+		$('#avail_default .aspect, #avail_addon .aspect').each(function() {
+			if (!$(this).hasClass('unavail')) {
+				selectedAspects.push($(this).attr('data-aspect'));
+			}
+		});
+		
+		localStorage.setItem('selectedAddons', JSON.stringify(selectedAddons));
+		localStorage.setItem('selectedAspects', JSON.stringify(selectedAspects));
+	}
+
+	// Restore aspect/addon state from localStorage
+	function restoreState(savedAddons, savedAspects) {
+		if (!savedAddons || !savedAspects) return;
+		
+		// Apply addons
+		savedAddons.forEach(function(addonId) {
+			$('#' + addonId).addClass('active');
+			addon_dictionary[addonId]["aspects"].forEach(function(e){
+				const obj = $('[data-aspect="'+e+'"]');
+				obj.find("img").attr("src", function(i,orig){ return orig.replace(/mono/, "color"); });
+				obj.removeClass("unavail");
+			});
+		});
+		
+		// Apply individual aspects
+		$('#avail_default .aspect, #avail_addon .aspect').each(function() {
+			const aspect = $(this).attr('data-aspect');
+			if (!savedAspects.includes(aspect)) {
+				$(this).find("img").attr("src", function(i,orig){ return orig.replace(/color/, "mono"); });
+				$(this).addClass("unavail");
+			}
+		});
+	}
+
+	// Aspect display click handlers
+	$(document).on('click', '#fromSel_display, #toSel_display', function() {
+		const fieldId = $(this).attr('id').replace('_display', '');
+		showAspectPicker(fieldId);
+	});
+
 	function getWeight(aspect)
 	{
-		var el = $("#" + aspect);
+		const el = $('[data-aspect="' + aspect + '"]');
 		return (el.hasClass("unavail")) ? 100 : 1;
 	}
 });
