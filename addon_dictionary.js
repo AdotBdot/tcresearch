@@ -83,7 +83,7 @@ var addon_dictionary = {
             hell: ["fire", "undead"],
             wind: ["air", "flight"],
             sight: ["senses", "crystal"],
-            control: ["mind", "machine"],
+            control: ["mind", "mechanism"],
         },
         tcversions: ['5', '6']
     },
