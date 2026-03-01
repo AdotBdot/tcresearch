@@ -23,6 +23,20 @@ $(function()
 		applyTheme(isDark ? 'light' : 'dark');
 	});
 
+	$('#help-toggle').click(function() {
+		$('#help-modal').addClass('active');
+	});
+
+	$('#help-close').click(function() {
+		$('#help-modal').removeClass('active');
+	});
+
+	$('#help-modal').click(function(e) {
+		if (e.target === this) {
+			$(this).removeClass('active');
+		}
+	});
+
 	const latest_version = "6.1.BETA26";
 	let version = latest_version;
 

@@ -23,13 +23,18 @@
 			<span class="navbar-brand mb-0 h1">
 				<i class="bi bi-sparkles"></i> Thaumcraft Research Helper
 			</span>
-			<button id="theme-toggle" class="btn btn-outline-light" style="margin-right: 1rem;">
-				<span id="theme-icon">🌙</span>
-			</button>
+			<div class="d-flex gap-2">
+				<button id="help-toggle" class="btn btn-dark" title="How to Use">
+					?
+				</button>
+				<button id="theme-toggle" class="btn btn-dark">
+					<span id="theme-icon">🌙</span>
+				</button>
+			</div>
 		</div>
 	</nav>
 
-	<div class="container-lg py-5">
+	<div class="container-lg py-1">
 	<div id="combination_box" class="combination-display">
 		<div class="d-flex justify-content-center align-items-center gap-3 flex-wrap">
 			<div id="left" class="aspect-box"></div>
@@ -134,25 +139,25 @@
 			</div>
 		</div>
 
-		<!-- Help Section -->
-		<hr class="my-5">
-		<div class="row mt-5">
-			<div class="col-lg-10 offset-lg-1">
-				<div class="card border-0 shadow-sm bg-light">
-					<div class="card-header border-0 py-3 bg-transparent">
-						<h5 class="card-title mb-0">How to Use</h5>
+		<!-- Help Modal -->
+		<div id="help-modal" class="aspect-picker-backdrop">
+			<div class="aspect-picker-modal">
+				<div class="aspect-picker-content">
+					<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+						<h5 style="margin: 0;">How to Use</h5>
+						<button id="help-close" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #333;">✕</button>
 					</div>
-					<div class="card-body text-muted">
+					<div class="modal-body-content">
 						<p><strong>Basic Usage:</strong> Choose two aspects from your research note using the selectors on the left. Specify the number of blank spaces between them and click <strong>Find Connection</strong>. The tool will find the shortest path connecting them.</p>
 						<p><strong>Disable Aspects:</strong> If you're unhappy with a path because you lack access to certain aspects, disable them from the "Available Aspects" section. The search will then find alternative paths without those aspects.</p>
-						<p class="mb-0 small">This work is licensed under <a href="http://creativecommons.org/licenses/by/4.0/" class="text-primary">Creative Commons Attribution 4.0</a>. Sources: <a href="https://github.com/ythri/tcresearch/tree/gh-pages" class="text-primary">GitHub Repository</a></p>
+						<p class="mb-0 small">This work is licensed under <a href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0</a>. Sources: <a href="https://adotbdot.github.io/tcresearch/tree/gh-pages">GitHub Repository</a></p>
 					</div>
 				</div>
 			</div>
 		</div>
 	</div>
 
-	<footer class="bg-dark text-light text-center py-4 mt-5 border-top">
+	<footer class="bg-dark text-light text-center py-4 mt-2 border-top">
 		<small>&copy; 2026 Thaumcraft Research Helper | Powered by Thaumcraft Community | Edited by AdotBdot and Meff1u</small>
 	</footer>
 </body>
