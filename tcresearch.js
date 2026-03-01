@@ -167,7 +167,7 @@ $(function()
 	const fromSel = document.getElementById("fromSel");
 	const toSel = document.getElementById("toSel");
 	const check = document.getElementById("available");
-	const steps = $("#spinner").spinner({min: 1, max: 10});
+	const steps = $("#spinner").spinner({min: 1, max: 10, buttons: false});
 	reset_aspects();
 
 	$("#find_connection").click(function(){

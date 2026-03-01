@@ -894,16 +894,6 @@ body.dark-mode .ui-spinner-input {
 	border-color: var(--border-color) !important;
 }
 
-body.dark-mode .ui-spinner-button {
-	background-color: var(--card-bg) !important;
-	border-color: var(--border-color) !important;
-	color: var(--text-primary) !important;
-}
-
-body.dark-mode .ui-spinner-button:hover {
-	background-color: var(--input-bg) !important;
-}
-
 body.dark-mode .result {
 	color: var(--text-primary);
 }
