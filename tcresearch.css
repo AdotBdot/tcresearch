@@ -768,6 +768,8 @@ body {
 	overflow: hidden !important;
 	animation: dialogSlideIn 0.3s ease !important;
 	max-height: 90vh !important;
+	margin: 0 !important;
+	padding: 0 !important;
 }
 
 @keyframes dialogSlideIn {
@@ -788,6 +790,9 @@ body {
 	padding: 1.5rem !important;
 	font-size: 1.1rem !important;
 	font-weight: 600 !important;
+	margin: 0 !important;
+	width: 100% !important;
+	box-sizing: border-box !important;
 }
 
 .ui-dialog .ui-dialog-titlebar .ui-dialog-title {
@@ -922,9 +927,18 @@ body.dark-mode .result > li .desc {
 	color: var(--text-light);
 }
 
+body.dark-mode .ui-dialog {
+	background-color: var(--bg-secondary) !important;
+}
+
+body.dark-mode .ui-dialog .ui-dialog-content {
+	background: var(--bg-secondary) !important;
+	color: var(--text-primary) !important;
+}
+
 body.dark-mode #aspects_used {
-	color: var(--text-primary);
-	border-top-color: var(--border-color);
+	color: var(--text-primary) !important;
+	border-top-color: var(--border-color) !important;
 }
 
 body.dark-mode #aspects_used_list li {
