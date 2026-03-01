@@ -54,6 +54,7 @@ $(function()
 		const savedFromAspect = localStorage.getItem('fromAspect');
 		const savedToAspect = localStorage.getItem('toAspect');
 		const savedAspects = localStorage.getItem('selectedAspects');
+		const savedAddons = localStorage.getItem('activeAddons');
 
 		if (savedVersion) version = savedVersion;
 		if (savedFromAspect) document.getElementById('fromSel').value = savedFromAspect;
@@ -63,7 +64,8 @@ $(function()
 			version: savedVersion,
 			fromAspect: savedFromAspect,
 			toAspect: savedToAspect,
-			aspects: savedAspects ? JSON.parse(savedAspects) : []
+			aspects: savedAspects ? JSON.parse(savedAspects) : [],
+			addons: savedAddons ? JSON.parse(savedAddons) : []
 		};
 	}
 
@@ -108,9 +110,19 @@ $(function()
 	{
 		function search(queue, to, visited)
 		{
-			while (!queue.isEmpty()) {
+			let iterations = 0;
+			const MAX_ITERATIONS = 100000;
+			const MAX_PATH_LENGTH = 50;
+			
+			while (!queue.isEmpty() && iterations < MAX_ITERATIONS) {
+				iterations++;
 				const element = queue.dequeue();
 				let node = element.path.pop();
+				
+				if (element.path.length > MAX_PATH_LENGTH) {
+					continue;
+				}
+				
 				if(!(node in visited) || visited[node].indexOf(element.path.length) < 0)
 				{
 					element.path.push(node);
@@ -118,6 +130,9 @@ $(function()
 						return element.path;
 
 					graph[node].forEach(function(entry) {
+						if ($('[data-aspect="' + entry + '"]').hasClass('unavail') && entry !== to) {
+							return;
+						}
 						const newpath = element.path.slice();
 						newpath.push(entry);
 						queue.enqueue({"path":newpath,"length":element.length+getWeight(entry)});
@@ -274,6 +289,13 @@ $(function()
 			}
 		});
 		
+		document.getElementById('fromSel').value = '';
+		document.getElementById('toSel').value = '';
+		updateAspectDisplay('fromSel');
+		updateAspectDisplay('toSel');
+		localStorage.removeItem('fromAspect');
+		localStorage.removeItem('toAspect');
+		
 		reset_aspects();
 		$("#def_only").click();
 	});
@@ -390,7 +412,7 @@ $(function()
 		}
 		
 		if (preferences && preferences.aspects) {
-			restoreState(preferences.aspects);
+			restoreState(preferences.aspects, preferences.addons);
 		}
 	}
 	function run()
@@ -398,6 +420,12 @@ $(function()
 		const fromSel = document.getElementById("fromSel").value;
 		const toSel = document.getElementById("toSel").value;
 		const path = find(fromSel, toSel, steps.spinner("value"));
+		
+		if (!path) {
+			alert('No possible connection found within ' + steps.spinner("value") + ' steps.');
+			return;
+		}
+		
 		const id = fromSel + 'to' + toSel;
 		const step_count = path.length - 2;
 		const title = formatAspectName(translate[fromSel])+' &rarr; '+formatAspectName(translate[toSel]) + ' (Total Steps: ' + step_count + ')';
@@ -469,10 +497,8 @@ $(function()
 		
 		// Get available aspects
 		let availableAspects = [];
-		$('#avail_default .aspect, #avail_addon .aspect').each(function() {
-			if (!$(this).hasClass('unavail')) {
-				availableAspects.push($(this).attr('data-aspect'));
-			}
+		$('#avail_default .aspect, [id^="avail_addon_"] .aspect').each(function() {
+			availableAspects.push($(this).attr('data-aspect'));
 		});
 		
 		// Create aspect buttons
@@ -542,6 +568,7 @@ $(function()
 
 	function saveState() {
 		const selectedAspects = [];
+		const activeAddons = [];
 		
 		$('#avail_default .aspect, [id^="avail_addon_"] .aspect').each(function() {
 			if (!$(this).hasClass('unavail')) {
@@ -549,35 +576,37 @@ $(function()
 			}
 		});
 		
+		$('.addon-toggle.active').each(function() {
+			activeAddons.push($(this).attr('id'));
+		});
+		
 		localStorage.setItem('selectedAspects', JSON.stringify(selectedAspects));
+		localStorage.setItem('activeAddons', JSON.stringify(activeAddons));
 	}
 
 	// Restore aspect/addon state from localStorage
-	function restoreState(savedAspects) {
+	function restoreState(savedAspects, savedAddons) {
 		if (!savedAspects) return;
 		
-		// Apply individual aspects
+		if (savedAddons && savedAddons.length > 0) {
+			$.each(addon_aspect_map, function(addonKey) {
+				const addonButton = $('#' + addonKey + '.addon-toggle');
+				if (savedAddons.includes(addonKey)) {
+					addonButton.addClass('active');
+				} else {
+					addonButton.removeClass('active');
+				}
+			});
+		}
+		
 		$('#avail_default .aspect, [id^="avail_addon_"] .aspect').each(function() {
 			const aspect = $(this).attr('data-aspect');
 			if (!savedAspects.includes(aspect)) {
 				$(this).find("img").attr("src", function(i,orig){ return orig.replace(/color/, "mono"); });
 				$(this).addClass("unavail");
-			}
-		});
-		
-		$.each(addon_aspect_map, function(addonKey, addonAspects) {
-			let allAspectsEnabled = true;
-			addonAspects.forEach(function(aspect) {
-				if ($('[data-aspect="' + aspect + '"]').hasClass('unavail')) {
-					allAspectsEnabled = false;
-				}
-			});
-			
-			const addonButton = $('#' + addonKey + '.addon-toggle');
-			if (allAspectsEnabled && addonAspects.length > 0) {
-				addonButton.addClass('active');
 			} else {
-				addonButton.removeClass('active');
+				$(this).find("img").attr("src", function(i,orig){ return orig.replace(/mono/, "color"); });
+				$(this).removeClass("unavail");
 			}
 		});
 	}
