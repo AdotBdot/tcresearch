@@ -70,7 +70,7 @@ body {
 
 .col-lg-4,
 .col-lg-8 {
-    padding-top: 2rem;
+    padding-top: 2.5rem;
 }
 
 .card {
@@ -661,7 +661,7 @@ body {
 }
 
 .avail-scroll-wrapper {
-	max-height: 600px;
+	max-height: 850px;
 	overflow-y: auto;
 	padding: 0 !important;
 }
