@@ -157,9 +157,11 @@ $(function()
 	{
 		addon_aspects = [];
 		addon_aspect_map = {};
+		let hasAddons = false;
 		
 		$.each(addon_dictionary, function(key, addon_info){
 			if (isAddonAvailableForVersion(key, version)) {
+				hasAddons = true;
 				$("#addons").append('<button type="button" class="addon-toggle" id="'+key+'">'+addon_info["name"]+'</button>');
 				
 				addon_aspects_for_addon = [];
@@ -176,6 +178,13 @@ $(function()
 				});
 			}
 		});
+		
+		// Show or hide addons card based on availability
+		if (hasAddons) {
+			$("#addons-card").show();
+		} else {
+			$("#addons-card").hide();
+		}
 		
 		addon_aspects = addon_aspects.sort(aspectSort);
 		$.each(addon_aspects, function(number, aspect){

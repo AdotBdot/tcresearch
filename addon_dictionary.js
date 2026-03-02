@@ -5,7 +5,7 @@ var addon_dictionary = {
         combinations: {
             apocalypse: ["greed", "eldritch"],
         },
-        tcversions: ['4', '5']
+        tcversions: ['4']
     },
     fm: {
         name: "Forbidden Magic",
@@ -19,7 +19,7 @@ var addon_dictionary = {
             pride: ["flight", "void"],
             lust: ["flesh", "hunger"],
         },
-        tcversions: ['4', '5']
+        tcversions: ['4']
     },
     mb: {
         name: "Magic Bees",
@@ -27,7 +27,7 @@ var addon_dictionary = {
         combinations: {
             time: ["void", "order"],
         },
-        tcversions: ['5', '6']
+        tcversions: ['4']
     },
     gt: {
         name: "Gregtech",
@@ -39,7 +39,7 @@ var addon_dictionary = {
             radioactivity: ["light", "energy"],
             stupidity: ["entropy", "mind"],
         },
-        tcversions: ['6']
+        tcversions: ['4']
     },
     nh: {
         name: "Gregtech: New Horizons",
@@ -51,7 +51,7 @@ var addon_dictionary = {
             glory: ["man", "travel"],
             star: ["light", "beginning"],
         },
-        tcversions: ['5', '6']
+        tcversions: ['4']
     },
     iaf: {
         name: "Ice and Fire",
@@ -59,7 +59,7 @@ var addon_dictionary = {
         combinations: {
             mythological: ["beast", "magic"],
         },
-        tcversions: ['4']
+        tcversions: ['6']
     },
     ta: {
         name: "Thaumic Additions",
@@ -85,6 +85,6 @@ var addon_dictionary = {
             sight: ["senses", "crystal"],
             control: ["mind", "mechanism"],
         },
-        tcversions: ['5', '6']
+        tcversions: ['6']
     },
 };
