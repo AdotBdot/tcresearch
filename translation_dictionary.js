@@ -83,4 +83,6 @@ var translate = {
     wind: "ventus",
     sight: "visum",
     control: "imperium",
+    crimson: "rubus", //Thaumic Revelations
+    excubitor: "excubitor", //Thaumic Revelations
 };

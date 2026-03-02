@@ -53,6 +53,15 @@ var addon_dictionary = {
         },
         tcversions: ['4']
     },
+    tr: {
+        name: "Thaumic Revelations",
+        aspects: ["excubitor", "crimson"],
+        combinations: {
+            excubitor: ["eldritch", "death"],
+            crimson: ["darkness", "magic"],
+        },
+        tcversions: ['4']
+    },
     iaf: {
         name: "Ice and Fire",
         aspects: ["mythological"],
