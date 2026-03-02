@@ -84,5 +84,11 @@ var translate = {
     sight: "visum",
     control: "imperium",
     crimson: "rubus", //Thaumic Revelations
-    excubitor: "excubitor", //Thaumic Revelations
+    warden: "excubitor", //Thaumic Revelations
+    coralium: "coralos", //AbyssalCraft Integration
+    dread: "dreadia", //AbyssalCraft Integration
+    color: "tincturem", //Botanical Addons
+    mru: "mru", //Essential Thaumaturgy
+    radiation: "radiation", //Essential Thaumaturgy
+    matrix: "matrix", //Essential Thaumaturgy
 };

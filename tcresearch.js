@@ -55,6 +55,7 @@ $(function()
 		const savedToAspect = localStorage.getItem('toAspect');
 		const savedAspects = localStorage.getItem('selectedAspects');
 		const savedAddons = localStorage.getItem('activeAddons');
+		const hiddenAddons = localStorage.getItem('hiddenAddons');
 
 		if (savedVersion) version = savedVersion;
 		if (savedFromAspect) document.getElementById('fromSel').value = savedFromAspect;
@@ -65,7 +66,8 @@ $(function()
 			fromAspect: savedFromAspect,
 			toAspect: savedToAspect,
 			aspects: savedAspects ? JSON.parse(savedAspects) : [],
-			addons: savedAddons ? JSON.parse(savedAddons) : []
+			addons: savedAddons ? JSON.parse(savedAddons) : [],
+			hiddenAddons: hiddenAddons ? JSON.parse(hiddenAddons) : []
 		};
 	}
 
@@ -162,7 +164,9 @@ $(function()
 		$.each(addon_dictionary, function(key, addon_info){
 			if (isAddonAvailableForVersion(key, version)) {
 				hasAddons = true;
-				$("#addons").append('<button type="button" class="addon-toggle" id="'+key+'">'+addon_info["name"]+'</button>');
+				const isHidden = preferences.hiddenAddons && preferences.hiddenAddons.includes(key);
+				const $btn = $('<button type="button" class="addon-toggle' + (isHidden ? ' hidden-addon' : '') + '" id="'+key+'">'+addon_info["name"]+'</button>');
+				$("#addons").append($btn);
 				
 				addon_aspects_for_addon = [];
 				
@@ -233,6 +237,10 @@ $(function()
 	$(document).on("click", ".addon-toggle", function() {
 		const addon = $(this).attr("id");
 		
+		if ($(this).hasClass('hidden-addon')) {
+			return;
+		}
+		
 		if (!isAddonAvailableForVersion(addon, version)) {
 			return;
 		}
@@ -257,6 +265,67 @@ $(function()
 		}
 		saveState();
 	});
+
+	document.addEventListener('contextmenu', function(e) {
+		const $target = $(e.target).closest('.addon-toggle');
+		if ($target.length === 0) return;
+		
+		e.preventDefault();
+		e.stopPropagation();
+		e.stopImmediatePropagation();
+		
+		const addon = $target.attr("id");
+		const hiddenAddons = localStorage.getItem('hiddenAddons') ? JSON.parse(localStorage.getItem('hiddenAddons')) : [];
+		
+		if (hiddenAddons.includes(addon)) {
+			hiddenAddons.splice(hiddenAddons.indexOf(addon), 1);
+			$target.removeClass('hidden-addon');
+			$target.removeClass('active');
+			const addonAspects = addon_aspect_map[addon];
+			if (addonAspects) {
+				const addonName = addon_dictionary[addon].name;
+				let addonHtml = '<div class="aspects-group" data-addon="' + addon + '">';
+				addonHtml += '<h6 class="aspects-group-title">' + addonName + ' (' + addonAspects.length + ')</h6>';
+				addonHtml += '<ul id="avail_addon_' + addon + '" class="aspectlist aspect-grid mb-0">';
+				addonAspects.forEach(function(aspect) {
+					addonHtml += '<li class="aspect unavail" data-aspect="'+aspect+'"><img src="aspects/mono/' + translate[aspect] + '.png" /><div>' + formatAspectName(translate[aspect]) + '</div><div class="desc">' + aspect + '</div></li>';
+				});
+				addonHtml += '</ul></div>';
+				
+				let inserted = false;
+				const addonKeys = Object.keys(addon_aspect_map);
+				const currentAddonIndex = addonKeys.indexOf(addon);
+				
+				for (let i = currentAddonIndex + 1; i < addonKeys.length; i++) {
+					const nextAddonKey = addonKeys[i];
+					const $nextAddonGroup = $('[data-addon="' + nextAddonKey + '"]');
+					if ($nextAddonGroup.length > 0) {
+						$nextAddonGroup.before(addonHtml);
+						inserted = true;
+						break;
+					}
+				}
+				
+				if (!inserted) {
+					$("#aspects-container").append(addonHtml);
+				}
+			}
+		} else {
+			hiddenAddons.push(addon);
+			$target.addClass('hidden-addon');
+			$target.removeClass('active');
+			
+			$("[data-addon=\"" + addon + "\"] .aspect.unavail").each(function() {
+				toggle(this);
+			});
+			
+			$("[data-addon=\"" + addon + "\"]").remove();
+		}
+		
+		localStorage.setItem('hiddenAddons', JSON.stringify(hiddenAddons));
+		saveState();
+		return false;
+	}, true);
 
 	$("#sel_all").click(function(){
 		$("#avail_default .aspect, [id^='avail_addon_'] .aspect").each(function(){
@@ -414,8 +483,12 @@ $(function()
 		$("#aspects-container").append(defaultHtml);
 		
 		$.each(addon_aspect_map, function(addonKey, addonAspects) {
+			if (preferences && preferences.hiddenAddons && preferences.hiddenAddons.includes(addonKey)) {
+				return;
+			}
+			
 			const addonName = addon_dictionary[addonKey].name;
-			let addonHtml = '<div class="aspects-group">';
+			let addonHtml = '<div class="aspects-group" data-addon="' + addonKey + '">';
 			addonHtml += '<h6 class="aspects-group-title">' + addonName + ' (' + addonAspects.length + ')</h6>';
 			addonHtml += '<ul id="avail_addon_' + addonKey + '" class="aspectlist aspect-grid mb-0">';
 			
@@ -594,6 +667,7 @@ $(function()
 	function saveState() {
 		const selectedAspects = [];
 		const activeAddons = [];
+		const hiddenAddons = localStorage.getItem('hiddenAddons') ? JSON.parse(localStorage.getItem('hiddenAddons')) : [];
 		
 		$('#avail_default .aspect, [id^="avail_addon_"] .aspect').each(function() {
 			if (!$(this).hasClass('unavail')) {
@@ -607,6 +681,7 @@ $(function()
 		
 		localStorage.setItem('selectedAspects', JSON.stringify(selectedAspects));
 		localStorage.setItem('activeAddons', JSON.stringify(activeAddons));
+		localStorage.setItem('hiddenAddons', JSON.stringify(hiddenAddons));
 	}
 
 	// Restore aspect/addon state from localStorage
