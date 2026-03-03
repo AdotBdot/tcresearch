@@ -161,10 +161,13 @@ $(function()
 		addon_aspect_map = {};
 		let hasAddons = false;
 		
+		// Zawsze załaduj aktualny stan z localStorage
+		const currentHiddenAddons = localStorage.getItem('hiddenAddons') ? JSON.parse(localStorage.getItem('hiddenAddons')) : [];
+		
 		$.each(addon_dictionary, function(key, addon_info){
 			if (isAddonAvailableForVersion(key, version)) {
 				hasAddons = true;
-				const isHidden = preferences.hiddenAddons && preferences.hiddenAddons.includes(key);
+				const isHidden = currentHiddenAddons.includes(key);
 				const $btn = $('<button type="button" class="addon-toggle' + (isHidden ? ' hidden-addon' : '') + '" id="'+key+'">'+addon_info["name"]+'</button>');
 				$("#addons").append($btn);
 				
@@ -391,7 +394,7 @@ $(function()
 			});
 			
 			const addonButton = $('#' + addonKey + '.addon-toggle');
-			if (allAspectsEnabled && addonAspects.length > 0) {
+			if (allAspectsEnabled && addonAspects.length > 0 && !addonButton.hasClass('hidden-addon')) {
 				addonButton.addClass('active');
 			} else {
 				addonButton.removeClass('active');
@@ -708,7 +711,7 @@ $(function()
 			});
 			
 			const addonButton = $('#' + addonKey + '.addon-toggle');
-			if (allAspectsEnabled && addonAspects.length > 0) {
+			if (allAspectsEnabled && addonAspects.length > 0 && !addonButton.hasClass('hidden-addon')) {
 				addonButton.addClass('active');
 			} else {
 				addonButton.removeClass('active');
