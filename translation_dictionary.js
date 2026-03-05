@@ -91,4 +91,5 @@ var translate = {
     mru: "mru", //Essential Thaumaturgy
     radiation: "radiation", //Essential Thaumaturgy
     matrix: "matrix", //Essential Thaumaturgy
+    holy: "sanctus", //The Elysium
 };

@@ -88,14 +88,28 @@ body {
 
 .card-header {
 	background: var(--primary-gradient) !important;
-	color: white;
+	color: white !important;
 	border-radius: 0.75rem 0.75rem 0 0 !important;
+	padding: 0.75rem 1.5rem !important;
+	height: 55px !important;
+	display: flex !important;
+	align-items: center !important;
+	width: 100%;
+}
+
+.card-header > div {
+	display: flex !important;
+	width: 100%;
+	justify-content: space-between !important;
+	align-items: center !important;
 }
 
 .card-title {
-	color: white;
-	font-weight: 600;
+	color: white !important;
+	font-weight: 600 !important;
 	letter-spacing: 0.3px;
+	margin: 0 !important;
+	padding: 0 !important;
 }
 
 .btn {

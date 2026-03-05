@@ -26,7 +26,7 @@ var addon_dictionary = {
         tcversions: ['4']
     },
     gtnh: {
-        name: "Gregtech: New Horizons",
+        name: "GregTech: New Horizons",
         aspects: ["beginning", "equality", "insanity", "glory", "star"],
         combinations: {
             beginning: ["void", "motion"],
@@ -73,6 +73,14 @@ var addon_dictionary = {
         },
         tcversions: ['4']
     },
+    ba: {
+        name: "Botanical Addons",
+        aspects: ["color"],
+        combinations: {
+            color: ["light", "order"],
+        },
+        tcversions: ['4']
+    },
     mb: {
         name: "Magic Bees",
         aspects: ["time"],
@@ -81,11 +89,11 @@ var addon_dictionary = {
         },
         tcversions: ['4']
     },
-    ba: {
-        name: "Botanical Addons",
-        aspects: ["color"],
+    te: {
+        name: "The Elysium",
+        aspects: ["holy"],
         combinations: {
-            color: ["light", "order"],
+            holy: ["soul", "aura"]
         },
         tcversions: ['4']
     },
