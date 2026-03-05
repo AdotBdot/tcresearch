@@ -161,7 +161,6 @@ $(function()
 		addon_aspect_map = {};
 		let hasAddons = false;
 		
-		// Zawsze załaduj aktualny stan z localStorage
 		const currentHiddenAddons = localStorage.getItem('hiddenAddons') ? JSON.parse(localStorage.getItem('hiddenAddons')) : [];
 		
 		$.each(addon_dictionary, function(key, addon_info){
