@@ -41,11 +41,16 @@ body {
 .navbar {
 	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 	backdrop-filter: blur(10px);
-	display: flex;
-	justify-content: center;
 	padding: 1rem 0 !important;
 	min-height: 55px;
 	flex-shrink: 0;
+}
+
+.navbar .container-fluid {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	width: 100%;
 }
 
 .navbar-brand {
@@ -944,6 +949,60 @@ body {
 		max-height: calc(90vh - 60px) !important;
 		overflow-y: auto !important;
 	}
+}
+
+.ui-dialog .ui-dialog-titlebar button.ui-dialog-titlebar-minimize {
+	background: transparent !important;
+	border: none !important;
+	color: white !important;
+	cursor: pointer !important;
+	width: 2rem !important;
+	height: 2rem !important;
+	display: flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	font-size: 1.5rem !important;
+	line-height: 1 !important;
+	margin-right: 0.5rem !important;
+}
+
+.ui-dialog .ui-dialog-titlebar button.ui-dialog-titlebar-minimize::before {
+	content: '_' !important;
+}
+
+.ui-dialog .ui-dialog-titlebar button.ui-dialog-titlebar-minimize:hover {
+	background: rgba(255, 255, 255, 0.2) !important;
+	border-radius: 0.3rem !important;
+}
+
+.minimized-connections-select {
+	padding: 0.5rem 0.75rem !important;
+	border: 1px solid #495057 !important;
+	border-radius: 0.3rem !important;
+	background-color: #343a40 !important;
+	color: #f8f9fa !important;
+	font-weight: 600 !important;
+	font-size: 0.875rem !important;
+	cursor: pointer !important;
+	transition: var(--transition) !important;
+	max-width: 200px !important;
+}
+
+.minimized-connections-select:hover {
+	background-color: #454d55 !important;
+	border-color: #667eea !important;
+}
+
+.minimized-connections-select:focus {
+	outline: none !important;
+	border-color: #667eea !important;
+	box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25) !important;
+}
+
+.minimized-connections-select option {
+	background-color: #343a40;
+	color: #f8f9fa;
+	padding: 0.5rem;
 }
 
 /* Dark Mode */

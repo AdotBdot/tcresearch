@@ -37,8 +37,45 @@ $(function()
 		}
 	});
 
+	$(document).on('change', '#minimized-connections-select', function() {
+		const selectedId = $(this).val();
+		if (selectedId) {
+			const connection = minimizedConnections.find(conn => conn.id === selectedId);
+			if (connection) {
+				$('#' + selectedId).dialog('open');
+				minimizedConnections = minimizedConnections.filter(conn => conn.id !== selectedId);
+				updateMinimizedConnectionsSelect();
+			}
+			$(this).val('');
+		}
+	});
+
 	const latest_version = "6.1.BETA26";
 	let version = latest_version;
+	
+	let minimizedConnections = [];
+
+	function updateMinimizedConnectionsSelect() {
+		const select = document.getElementById('minimized-connections-select');
+		
+		const currentVersionConnections = minimizedConnections.filter(conn => conn.version === version);
+		
+		if (currentVersionConnections.length === 0) {
+			select.style.display = 'none';
+			select.innerHTML = '<option value="">Restore Connection...</option>';
+			return;
+		}
+		
+		select.style.display = 'block';
+		select.innerHTML = '<option value="">Restore Connection...</option>';
+		
+		currentVersionConnections.forEach(function(connection) {
+			const option = document.createElement('option');
+			option.value = connection.id;
+			option.textContent = connection.title.replace(' &rarr; ', ' → ').replace(/<[^>]*>/g, '');
+			select.appendChild(option);
+		});
+	}
 
 	function isAddonAvailableForVersion(addonKey, selectedVersion) {
 		const addon = addon_dictionary[addonKey];
@@ -53,8 +90,6 @@ $(function()
 		const savedVersion = localStorage.getItem('selectedVersion');
 		const savedFromAspect = localStorage.getItem('fromAspect');
 		const savedToAspect = localStorage.getItem('toAspect');
-		const savedAspects = localStorage.getItem('selectedAspects');
-		const savedAddons = localStorage.getItem('activeAddons');
 		const hiddenAddons = localStorage.getItem('hiddenAddons');
 
 		if (savedVersion) version = savedVersion;
@@ -65,8 +100,8 @@ $(function()
 			version: savedVersion,
 			fromAspect: savedFromAspect,
 			toAspect: savedToAspect,
-			aspects: savedAspects ? JSON.parse(savedAspects) : [],
-			addons: savedAddons ? JSON.parse(savedAddons) : [],
+			aspects: [],
+			addons: [],
 			hiddenAddons: hiddenAddons ? JSON.parse(hiddenAddons) : []
 		};
 	}
@@ -82,6 +117,7 @@ $(function()
 	let tier_aspects = [];
 	let combinations = {};
 	let addon_aspect_map = {};
+	let unavailableAspects = new Set();
 	$("#version").val(preferences.version || latest_version);
 	version = preferences.version || latest_version;
 	let graph = {};
@@ -132,7 +168,7 @@ $(function()
 						return element.path;
 
 					graph[node].forEach(function(entry) {
-						if ($('[data-aspect="' + entry + '"]').hasClass('unavail') && entry !== to) {
+						if (unavailableAspects.has(entry) && entry !== to) {
 							return;
 						}
 						const newpath = element.path.slice();
@@ -202,6 +238,12 @@ $(function()
 	{
 		$(obj).find("img").attr("src", function(i,orig){ return (orig.indexOf("color") < 0) ? orig.replace(/mono/, "color") : orig.replace(/color/, "mono"); });
 		$(obj).toggleClass("unavail");
+		const aspect = $(obj).attr('data-aspect');
+		if ($(obj).hasClass('unavail')) {
+			unavailableAspects.add(aspect);
+		} else {
+			unavailableAspects.delete(aspect);
+		}
 	}
 
 	function toggle_addons(aspect_list)
@@ -210,6 +252,7 @@ $(function()
 			const obj = $('[data-aspect="'+e+'"]');
 			obj.find("img").attr("src", function(i, orig){ return orig.replace(/color/, "mono"); });
 			obj.addClass("unavail");
+			unavailableAspects.add(e);
 		});
 	}
 
@@ -231,6 +274,12 @@ $(function()
 	const check = document.getElementById("available");
 	const steps = $("#spinner").spinner({min: 1, max: 10, buttons: false});
 	reset_aspects();
+	
+	const savedAspects = localStorage.getItem('selectedAspects_' + version);
+	const savedAddons = localStorage.getItem('activeAddons_' + version);
+	if (savedAspects) {
+		restoreState(JSON.parse(savedAspects), savedAddons ? JSON.parse(savedAddons) : []);
+	}
 
 	$("#find_connection").click(function(){
 		run();
@@ -255,6 +304,7 @@ $(function()
 				const obj = $('[data-aspect="'+e+'"]');
 				obj.find("img").attr("src", function(i,orig){ return orig.replace(/mono/, "color"); });
 				obj.removeClass("unavail");
+				unavailableAspects.delete(e);
 			});
 		}
 		else
@@ -263,6 +313,7 @@ $(function()
 				const obj = $('[data-aspect="'+e+'"]');
 				obj.find("img").attr("src", function(i,orig){ return orig.replace(/color/, "mono"); });
 				obj.addClass("unavail");
+				unavailableAspects.add(e);
 			});
 		}
 		saveState();
@@ -291,6 +342,7 @@ $(function()
 				addonHtml += '<ul id="avail_addon_' + addon + '" class="aspectlist aspect-grid mb-0">';
 				addonAspects.forEach(function(aspect) {
 					addonHtml += '<li class="aspect unavail" data-aspect="'+aspect+'"><img src="aspects/mono/' + translate[aspect] + '.png" /><div>' + formatAspectName(translate[aspect]) + '</div><div class="desc">' + aspect + '</div></li>';
+					unavailableAspects.add(aspect);
 				});
 				addonHtml += '</ul></div>';
 				
@@ -317,9 +369,12 @@ $(function()
 			$target.addClass('hidden-addon');
 			$target.removeClass('active');
 			
-			$("[data-addon=\"" + addon + "\"] .aspect.unavail").each(function() {
-				toggle(this);
-			});
+			const addonAspects = addon_aspect_map[addon];
+			if (addonAspects) {
+				addonAspects.forEach(function(aspect) {
+					unavailableAspects.add(aspect);
+				});
+			}
 			
 			$("[data-addon=\"" + addon + "\"]").remove();
 		}
@@ -333,17 +388,21 @@ $(function()
 		const hiddenAddons = localStorage.getItem('hiddenAddons') ? JSON.parse(localStorage.getItem('hiddenAddons')) : [];
 		
 		$("#avail_default .aspect").each(function(){
+			const aspect = $(this).attr('data-aspect');
 			$(this).find("img").attr("src", function(i,orig){ return orig.replace("mono", "color")});
 			$(this).removeClass("unavail");
+			unavailableAspects.delete(aspect);
 		});
 		
 		$("[id^='avail_addon_'] .aspect").each(function(){
 			const addonId = $(this).closest('[id^="avail_addon_"]').attr('id');
 			const addonKey = addonId.replace('avail_addon_', '');
+			const aspect = $(this).attr('data-aspect');
 			
 			if (!hiddenAddons.includes(addonKey)) {
 				$(this).find("img").attr("src", function(i,orig){ return orig.replace("mono", "color")});
 				$(this).removeClass("unavail");
+				unavailableAspects.delete(aspect);
 			}
 		});
 		
@@ -359,20 +418,26 @@ $(function()
 	$("#def_only").click(function(){
 		$(".addon-toggle").removeClass('active');
 		$("#avail_default .aspect").each(function(){
+			const aspect = $(this).attr('data-aspect');
 			$(this).find("img").attr("src", function(i,orig){ return orig.replace("mono", "color")});
 			$(this).removeClass("unavail");
+			unavailableAspects.delete(aspect);
 		});
 		$("[id^='avail_addon_'] .aspect").each(function(){
+			const aspect = $(this).attr('data-aspect');
 			$(this).find("img").attr("src", function(i,orig){ return orig.replace("color", "mono")});
 			$(this).addClass("unavail");
+			unavailableAspects.add(aspect);
 		});
 		saveState();
 	});
 
 	$("#desel_all").click(function(){
 		$("#avail_default .aspect, [id^='avail_addon_'] .aspect").each(function(){
+			const aspect = $(this).attr('data-aspect');
 			$(this).find("img").attr("src", function(i,orig){ return orig.replace("color", "mono")});
 			$(this).addClass("unavail");
+			unavailableAspects.add(aspect);
 		});
 		$(".addon-toggle").removeClass('active');
 		saveState();
@@ -395,7 +460,17 @@ $(function()
 		localStorage.removeItem('toAspect');
 		
 		reset_aspects();
-		$("#def_only").click();
+		
+		const savedAspects = localStorage.getItem('selectedAspects_' + version);
+		const savedAddons = localStorage.getItem('activeAddons_' + version);
+		
+		if (savedAspects) {
+			restoreState(JSON.parse(savedAspects), savedAddons ? JSON.parse(savedAddons) : []);
+		} else {
+			$("#def_only").click();
+		}
+		
+		updateMinimizedConnectionsSelect();
 	});
 
 	$(document).on( "click", "#avail_default .aspect, [id^='avail_addon_'] .aspect", function(){
@@ -473,6 +548,8 @@ $(function()
 
 	function reset_aspects()
 	{
+		unavailableAspects.clear();
+		
 		aspects = $.extend([], version_dictionary[version]["base_aspects"]);
 		combinations = $.extend(true, {}, version_dictionary[version]["combinations"]);
 		$("#aspects-container").empty();
@@ -530,10 +607,6 @@ $(function()
 			connect(compound, combinations[compound][0]);
 			connect(compound, combinations[compound][1]);
 		}
-		
-		if (preferences && preferences.aspects) {
-			restoreState(preferences.aspects, preferences.addons);
-		}
 	}
 	function run()
 	{
@@ -554,7 +627,38 @@ $(function()
 		$('#' + id).remove();
 		$("body").append('<ul id="'+id+'" class="aspectlist result" title="'+title+'"></ul>');
 		const dialogWidth = Math.round($(window).width() * 0.8);
-		$('#' + id).dialog({autoOpen: false, modal: false, resizable: false, width: dialogWidth});
+		
+		$('#' + id).dialog({
+			autoOpen: false, 
+			modal: false, 
+			resizable: false, 
+			width: dialogWidth,
+			open: function() {
+				const titlebar = $(this).siblings('.ui-dialog-titlebar');
+				if (titlebar.length > 0 && titlebar.find('.ui-dialog-titlebar-minimize').length === 0) {
+					const closeButton = titlebar.find('.ui-dialog-titlebar-close');
+					if (closeButton.length > 0) {
+						const minimizeButton = $('<button type="button" class="ui-dialog-titlebar-minimize" aria-label="Minimize"></button>');
+						minimizeButton.insertBefore(closeButton);
+						
+						minimizeButton.on('click', function(e) {
+							e.preventDefault();
+							$('#' + id).dialog('close');
+							
+						if (!minimizedConnections.some(conn => conn.id === id)) {
+							minimizedConnections.push({
+								id: id,
+								title: title,
+								version: version
+								});
+							}
+							
+							updateMinimizedConnectionsSelect();
+						});
+					}
+				}
+			}
+		});
 		$('#' + id).append("<div></div>");
 		let loop_count=0;
 		path.forEach(function(e) {
@@ -701,8 +805,8 @@ $(function()
 			activeAddons.push($(this).attr('id'));
 		});
 		
-		localStorage.setItem('selectedAspects', JSON.stringify(selectedAspects));
-		localStorage.setItem('activeAddons', JSON.stringify(activeAddons));
+		localStorage.setItem('selectedAspects_' + version, JSON.stringify(selectedAspects));
+		localStorage.setItem('activeAddons_' + version, JSON.stringify(activeAddons));
 		localStorage.setItem('hiddenAddons', JSON.stringify(hiddenAddons));
 	}
 
@@ -715,9 +819,11 @@ $(function()
 			if (!savedAspects.includes(aspect)) {
 				$(this).find("img").attr("src", function(i,orig){ return orig.replace(/color/, "mono"); });
 				$(this).addClass("unavail");
+				unavailableAspects.add(aspect);
 			} else {
 				$(this).find("img").attr("src", function(i,orig){ return orig.replace(/mono/, "color"); });
 				$(this).removeClass("unavail");
+				unavailableAspects.delete(aspect);
 			}
 		});
 		
@@ -746,7 +852,6 @@ $(function()
 
 	function getWeight(aspect)
 	{
-		const el = $('[data-aspect="' + aspect + '"]');
-		return (el.hasClass("unavail")) ? 100 : 1;
+		return unavailableAspects.has(aspect) ? 100 : 1;
 	}
 });
